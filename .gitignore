@@ -1,0 +1,6 @@
+.virtual_documents/
+*.zip
+raw_data/
+data/raw/
+__pycache__/
+.ipynb_checkpoints/
