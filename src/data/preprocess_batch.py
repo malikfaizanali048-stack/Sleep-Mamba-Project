@@ -1,19 +1,19 @@
 """
 preprocess_batch.py
+Runs preprocess.py logic over ALL currently-available subjects, skipping
+already-processed ones. Includes normalization + missing-file resilience.
 """
 
 import os
 import sys
 import numpy as np
-import mne
 
-# Ensure Python looks in src/data/ for modules
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
 from preprocess import (
     load_subject, annotations_to_epoch_labels, trim_wake_padding,
     segment_signal, find_subject_pairs, RAW_DIR, OUT_DIR
 )
+
 
 def process_subject(psg_path, hyp_path, subject_id, out_dir):
     out_path = os.path.join(out_dir, f"{subject_id}.npz")
@@ -59,5 +59,4 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"  ERROR processing {subject_id}: {e}")
 
-    print("\nDone. Re-run this script anytime more subjects finish downloading --")
-    print("already-processed subjects will be skipped automatically.")
+    print("\nDone.")
