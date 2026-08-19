@@ -23,7 +23,7 @@ except ImportError:
 
 
 class MambaBlock(nn.Module):
-    def __init__(self, d_model: int, d_inner: int = None, d_state: int = 16, conv_kernel: int = 4):
+    def __init__(self, d_model: int, d_inner: int = None, d_state: int = 16, conv_kernel: int = 4): # type: ignore
         super().__init__()
         self.mamba = Mamba(
             d_model=d_model,
