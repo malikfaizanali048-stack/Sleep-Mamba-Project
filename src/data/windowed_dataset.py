@@ -1,9 +1,8 @@
 """
 windowed_dataset.py
-
-PyTorch Dataset that builds non-overlapping T-epoch windows from a list
-of subject .npz files (as produced by kfold_split.py's train/test file
-lists). Matches paper's sequence-to-sequence formulation: X in R^(T x C x L).
+PyTorch Dataset building non-overlapping T-epoch windows from subject .npz files.
+Handles both possible key naming conventions ("signals"/"labels" or "x"/"y")
+so it works regardless of which preprocessing run produced the data.
 """
 
 import os
@@ -15,12 +14,31 @@ from torch.utils.data import Dataset
 class SleepWindowDataset(Dataset):
     def __init__(self, processed_dir, file_list, T):
         self.T = T
-        self.windows = []  # list of (signals[T,C,L], labels[T])
+        self.windows = []
 
         for fname in file_list:
-            path = os.path.join(processed_dir, fname)
+            path = os.path.join(processed_dir, fname) if not fname.startswith("/") else fname
+            if not os.path.exists(path):
+                path = os.path.join(processed_dir, os.path.basename(fname))
+            if not os.path.exists(path):
+                continue
+
             data = np.load(path)
-            signals, labels = data["signals"], data["labels"]
+            keys = data.files
+
+            if "signals" in keys:
+                signals = data["signals"]
+            elif "x" in keys:
+                signals = data["x"]
+            else:
+                raise KeyError(f"No recognized signal key in {fname}. Found keys: {keys}")
+
+            if "labels" in keys:
+                labels = data["labels"]
+            elif "y" in keys:
+                labels = data["y"]
+            else:
+                raise KeyError(f"No recognized label key in {fname}. Found keys: {keys}")
 
             n_epochs = signals.shape[0]
             n_windows = n_epochs // T
